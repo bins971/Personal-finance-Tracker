@@ -9,6 +9,8 @@ const goalRoutes = require("./routes/Goal");
 const connectDB = require("./config/db");
 const ExpenseRoutes = require("./routes/Expense");
 const expenseRoutes = require('./routes/expenseRoutes');
+const advisorRoutes = require("./routes/advisor");
+
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -21,6 +23,7 @@ app.use("/api/budget", budgetRoutes);
 app.use("/api/expense", ExpenseRoutes)
 app.use("/api/goal", goalRoutes);
 app.use('/api', expenseRoutes);
+app.use("/api/advisor", advisorRoutes);
 app.get("/", (req, res) => {
   res.send("Welcome to the User API");
 });

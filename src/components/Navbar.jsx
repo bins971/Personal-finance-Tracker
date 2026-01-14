@@ -7,13 +7,14 @@ import styles from '../styles/home.module.css';
 import PersonIcon from '@mui/icons-material/Person';
 import EmailRoundedIcon from '@mui/icons-material/EmailRounded';
 import logo from '../images/logo1.png';
-import { Link, useNavigate } from "react-router-dom"; 
-import { useAuth } from "./context/AuthContext"; 
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "./context/AuthContext";
 import GradeIcon from '@mui/icons-material/Grade';
+import SmartToyIcon from '@mui/icons-material/SmartToy';
 
 
-function CustomNavbar() { 
-    const navigate = useNavigate(); 
+function CustomNavbar() {
+    const navigate = useNavigate();
     const handleLogout = () => {
         localStorage.removeItem('authToken');
     }
@@ -47,10 +48,15 @@ function CustomNavbar() {
                     <Link to="/"><button id="loginbutton" onClick={handleLogout} className="btn">
                         LogOut
                     </button></Link>
-                   
+
                     <div>
                         <Link to="/Reward" className={styles.profile}>
-                            <GradeIcon/>
+                            <GradeIcon />
+                        </Link>
+                    </div>
+                    <div>
+                        <Link to="/advisor" className={styles.profile} style={{ marginRight: '15px' }}>
+                            <SmartToyIcon />
                         </Link>
                     </div>
                     <div>

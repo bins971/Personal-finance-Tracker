@@ -16,6 +16,7 @@ import BudgetForm from './components/Home/setBudget';
 import { BudgetProvider } from './context/BudgetContext';
 import CustomExpense from './components/Home/CustomExpense';
 import Reward from './components/Home/Reward';
+import Advisor from './components/Home/Advisor';
 
 function App() {
   return (
@@ -37,6 +38,7 @@ function App() {
               <Route path="/setBudget" element={<BudgetForm />} />
               <Route path="/CustomExpense" element={<CustomExpense />} />
               <Route path="/Reward" element={<Reward />} />
+              <Route path="/advisor" element={<Advisor />} />
             </Routes>
           </Layout>
         </BudgetProvider>
@@ -58,4 +60,4 @@ const Layout = ({ children }) => {
   );
 };
 
-export default App;
+export default App;
