@@ -18,14 +18,14 @@ const UserSignUp = () => {
     event.preventDefault();
     setErrorMessage("");
     try {
-      const response = await fetch("http://localhost:5000/api/auth/signup", {
+      const response = await fetch("http://localhost:5000/api/auth/signup",{
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password, username, gender, age, dob, workingStatus }),
       });
       const data = await response.json();
       if (response.ok) navigate("/login");
-      else setErrorMessage(data.errors || "Sign-up failed. Try again.");
+      else setErrorMessage(data.message || data.errors || "Sign-up failed. Try again.");
     } catch (error) {
       setErrorMessage("An error occurred. Please try again.");
     }

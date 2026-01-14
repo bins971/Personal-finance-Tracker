@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { Container, Grid, Card, Typography, Box, CardContent } from '@mui/material';
-import { Pie,Line } from 'react-chartjs-2';
-import { Chart as ChartJS, ArcElement, CategoryScale, LinearScale, Title, Tooltip, Legend, PointElement, LineElement  } from 'chart.js';
+import { Pie, Line } from 'react-chartjs-2';
+import { Chart as ChartJS, ArcElement, CategoryScale, LinearScale, Title, Tooltip, Legend, PointElement, LineElement } from 'chart.js';
 import styles from '../../styles/home.module.css';
 import axios from 'axios';
 import { AuthContext } from '../../context/AuthContext';
@@ -18,7 +18,7 @@ const Dashboard = () => {
   const [categoryPercentages, setCategoryPercentages] = useState([]);
   const [dailyExpenses, setDailyExpenses] = useState([]);
   const [lineDataa, setLineData] = useState({});
-  
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -27,22 +27,22 @@ const Dashboard = () => {
         setCurrentAmount(response.data.currentAmount);
         const date = new Date(response.data.startdate);
 
-// To get the date in YYYY-MM-DD format:
-const startformattedDate = date.toISOString().split('T')[0];
-const enddate = new Date(response.data.enddate);
+        // To get the date in YYYY-MM-DD format:
+        const startformattedDate = date.toISOString().split('T')[0];
+        const enddate = new Date(response.data.enddate);
 
-// To get the date in YYYY-MM-DD format:
-const endformattedDate = enddate.toISOString().split('T')[0];
+        // To get the date in YYYY-MM-DD format:
+        const endformattedDate = enddate.toISOString().split('T')[0];
         setenddate(endformattedDate)
         setstartdate(startformattedDate)
-      const response1 = await axios.get(`http://localhost:5000/api/expense/category-percentage/${user.id}`);
-      console.log("response1")
-      console.log(response1)
-      setCategoryPercentages(response1.data.categoryPercentages);
-      const response2 = await axios.get(`http://localhost:5000/api/expense/daily-expenses/${user.id}`)
-      console.log("response2")
-      console.log(response2)
-      setDailyExpenses(response2.data.dailyExpenses);
+        const response1 = await axios.get(`http://localhost:5000/api/expense/category-percentage/${user.id}`);
+        console.log("response1")
+        console.log(response1)
+        setCategoryPercentages(response1.data.categoryPercentages);
+        const response2 = await axios.get(`http://localhost:5000/api/expense/daily-expenses/${user.id}`)
+        console.log("response2")
+        console.log(response2)
+        setDailyExpenses(response2.data.dailyExpenses);
       } catch (error) {
         console.error('Error fetching expenses:', error);
       } finally {
@@ -70,7 +70,7 @@ const endformattedDate = enddate.toISOString().split('T')[0];
     };
     setLineData(newLineData);
   }, [dailyExpenses]);
-  
+
   const data = {
     labels: categoryPercentages.map((item) => item.category), // Category names
     datasets: [
@@ -126,9 +126,9 @@ const endformattedDate = enddate.toISOString().split('T')[0];
   return (
     <div className={styles.dbody}>
       <Container maxWidth="lg" sx={{ marginTop: 4 }}>
-        <div className="dated" style={{display:"flex",justifyContent:"space-between"}}>
-        <h5> Start date: {startdate}</h5>
-        <h5>End date: {enddate}</h5>
+        <div className="dated" style={{ display: "flex", justifyContent: "space-between" }}>
+          <h5> Start date: {startdate}</h5>
+          <h5>End date: {enddate}</h5>
         </div>
         {loading ? (
           <Box display="flex" justifyContent="center" alignItems="center" height="100vh">
@@ -142,7 +142,7 @@ const endformattedDate = enddate.toISOString().split('T')[0];
                 {/* Current Budget Card */}
                 <Grid item xs={12} sm={4} md={4}>
                   <Card sx={{ padding: 2, display: 'flex', flexDirection: 'column', alignItems: 'center', borderRadius: '16px', minHeight: '50px' }}>
-                    <Typography  variant="h5" >Your Current Budget</Typography>
+                    <Typography variant="h5" >Your Current Budget</Typography>
                     <CardContent>
                       <Typography variant="h4" sx={{ color: 'green', fontWeight: 'bold' }}>₱{totalAmount}</Typography>
                     </CardContent>
@@ -183,14 +183,14 @@ const endformattedDate = enddate.toISOString().split('T')[0];
                     </CardContent>
                   </Card>
                 </Grid>
-                <Grid item xs={12} sm={6} md={6}>
-  <Card sx={{ padding: 2, display: 'flex', flexDirection: 'column', alignItems: 'center', borderRadius: '16px', minHeight: '400px' }} >
-    <Typography variant="h5" sx={{ marginBottom: 0.1 }}>Daily Expenses Over Time</Typography>
-    <CardContent>
-      <Line data={lineDataa} options={lineOptions} height={330} width={400} /> {/* You can adjust the height here as well */}
-    </CardContent>
-  </Card>
-</Grid>
+                <Grid item xs={12} sm={3} md={4}>
+                  <Card sx={{ padding: 2, display: 'flex', flexDirection: 'column', alignItems: 'center', borderRadius: '16px', minHeight: '250px' }} >
+                    <Typography variant="h5" sx={{ marginBottom: 0.1 }}>Daily Expenses Over Time</Typography>
+                    <CardContent>
+                      <Line data={lineDataa} options={lineOptions} />
+                    </CardContent>
+                  </Card>
+                </Grid>
                 {/* Expense Breakdown Card */}
                 {/* <Grid item xs={12} sm={6} md={8}>
                   <Card sx={{ padding: 3, display: 'flex', flexDirection: 'column', alignItems: 'center', borderRadius: '16px', minHeight: '250px' }}>
