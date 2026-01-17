@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useContext } from 'react';
-import { Box, Typography, Button, TextField, MenuItem, IconButton, Card, Grid, CircularProgress, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
+import React, { useState, useEffect, useContext, useCallback } from 'react';
+import { Box, Typography, Button, TextField, MenuItem, IconButton, Card, CircularProgress, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import AddIcon from '@mui/icons-material/Add';
 import axios from 'axios';
@@ -13,13 +13,7 @@ const Subscriptions = () => {
     const [open, setOpen] = useState(false);
     const [newSub, setNewSub] = useState({ name: '', amount: '', cycle: 'Monthly', category: 'Subscription', startDate: new Date().toISOString().split('T')[0] });
 
-    useEffect(() => {
-        if (user && user.id) {
-            fetchSubscriptions();
-        }
-    }, [user]);
-
-    const fetchSubscriptions = async () => {
+    const fetchSubscriptions = useCallback(async () => {
         try {
             const res = await axios.get(`${API_URL}/subscription/get/${user.id}`);
             setSubscriptions(Array.isArray(res.data) ? res.data : []);
@@ -28,7 +22,13 @@ const Subscriptions = () => {
             console.error("Error fetching subscriptions", error);
             setLoading(false);
         }
-    };
+    }, [user.id]);
+
+    useEffect(() => {
+        if (user && user.id) {
+            fetchSubscriptions();
+        }
+    }, [user, fetchSubscriptions]);
 
     const handleAdd = async () => {
         try {

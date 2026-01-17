@@ -16,10 +16,8 @@ import { Delete as DeleteIcon } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { API_URL } from "../../apiConfig";
-import styles from "../../styles/home.module.css";
 import NoData from "../../images/NoData.png";
 import { useAuth } from "../../context/AuthContext";
-import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 
 const MyGoal = () => {
   const { user } = useAuth();

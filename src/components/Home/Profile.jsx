@@ -68,7 +68,7 @@ const Profile = () => {
     if (loggedInUserEmail) {
       fetchUserData();
     }
-  }, [user?.id, user?._id]);
+  }, [user?.id, user?._id, loggedInUserEmail]);
   const handleChange = (e) => {
     setUser({
       ...edituser,

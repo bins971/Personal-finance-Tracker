@@ -8,14 +8,10 @@ import { Box, Typography } from '@mui/material';
 
 const BudgetForm = () => {
   const { user } = useContext(AuthContext);
-  const [amount, setAmount] = useState('');
-
-  const [currentAmount, setCurrentAmount] = useState(0);
   const [error, setError] = useState('');
   const [totalAmount, setTotalAmount] = useState(null);
   const [startdate, setstartdate] = useState(null);
   const [enddate, setenddate] = useState(null);
-  const [loading, setLoading] = useState(true);
   const [budgetData, setBudgetData] = useState(null);  // Store budget data in state
   const navigate = useNavigate();
 
@@ -25,9 +21,8 @@ const BudgetForm = () => {
       try {
         const response1 = await axios.get(`${API_URL}/budget/fetch/${user.id}`);
 
-        // Setting totalAmount and currentAmount
+        // Setting totalAmount
         setTotalAmount(response1.data.totalAmount);
-        setCurrentAmount(response1.data.currentAmount);
 
         // Formatting start date
         if (response1.data.startdate) {
@@ -55,7 +50,7 @@ const BudgetForm = () => {
 
     // Fetching the data when the component mounts or user.id changes
     fetchBudgetData();
-  }, [user?.id]);
+  }, [user]);
 
 
   const handleBack = () => {

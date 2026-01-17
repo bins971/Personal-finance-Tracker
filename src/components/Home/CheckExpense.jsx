@@ -1,8 +1,8 @@
-import React, { useState, useContext, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { API_URL } from "../../apiConfig";
 import styles from "../../styles/checkexpense.module.css";
 import axios from "axios";
-import { AuthContext } from "../../context/AuthContext.js";
+
 import { useParams } from 'react-router-dom';
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
@@ -13,7 +13,6 @@ export default function CheckExpense() {
   const [error] = useState("");
   const [selectedDate, setSelectedDate] = useState(null);
   const [viewMode, setViewMode] = useState("daily");
-  const { } = useContext(AuthContext);
   const { id } = useParams();
 
 

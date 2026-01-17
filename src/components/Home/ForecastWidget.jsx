@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext, useCallback } from 'react';
 import { API_URL } from "../../apiConfig";
-import { Card, Box, Typography, CircularProgress, Icon } from '@mui/material';
+import { Card, Box, Typography, CircularProgress } from '@mui/material';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import TrendingDownIcon from '@mui/icons-material/TrendingDown';
 import TrendingFlatIcon from '@mui/icons-material/TrendingFlat';
@@ -12,12 +12,6 @@ const ForecastWidget = () => {
     const [forecast, setForecast] = useState(null);
     const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
-        if (user && user.id) {
-            fetchForecast();
-        }
-    }, [user, fetchForecast]);
-
     const fetchForecast = useCallback(async () => {
         try {
             const res = await axios.get(`${API_URL}/advisor/forecast/${user.id}`);
@@ -28,6 +22,12 @@ const ForecastWidget = () => {
             setLoading(false);
         }
     }, [user?.id]);
+
+    useEffect(() => {
+        if (user && user.id) {
+            fetchForecast();
+        }
+    }, [user, fetchForecast]);
 
     if (loading) return <CircularProgress size={20} />;
 
