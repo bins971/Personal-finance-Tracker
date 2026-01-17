@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect, useContext, useCallback } from 'react';
 import { API_URL } from "../../apiConfig";
 import { Card, Box, Typography, CircularProgress, Icon } from '@mui/material';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
@@ -10,7 +10,7 @@ import { AuthContext } from "../../context/AuthContext";
 const ForecastWidget = () => {
     const { user } = useContext(AuthContext);
     const [forecast, setForecast] = useState(null);
-    const [loading] = useState(true);
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         if (user && user.id) {
@@ -18,7 +18,7 @@ const ForecastWidget = () => {
         }
     }, [user, fetchForecast]);
 
-    const fetchForecast = async () => {
+    const fetchForecast = useCallback(async () => {
         try {
             const res = await axios.get(`${API_URL}/advisor/forecast/${user.id}`);
             setForecast(res.data);
@@ -27,7 +27,7 @@ const ForecastWidget = () => {
             console.error("Error fetching forecast", error);
             setLoading(false);
         }
-    };
+    }, [user?.id]);
 
     if (loading) return <CircularProgress size={20} />;
 
