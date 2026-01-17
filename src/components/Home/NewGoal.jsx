@@ -3,10 +3,11 @@ import styles from "../../styles/goal.module.css";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../../context/AuthContext";
 import axios from "axios";
+import { API_URL } from "../../apiConfig";
 
 const NewGoal = () => {
   const [goalData, setGoalData] = useState({
-    user: "", 
+    user: "",
     name: "",
     amount: "",
     saved: "",
@@ -18,7 +19,7 @@ const NewGoal = () => {
   const navigate = useNavigate();
   const { user } = useContext(AuthContext);
 
- 
+
 
 
   const handleInputChange = (e) => {
@@ -70,7 +71,7 @@ const NewGoal = () => {
       setError("End date must be after the start date.");
       return;
     }
-  
+
     try {
       // Include the logged-in user's email
       const goal = {
@@ -82,13 +83,13 @@ const NewGoal = () => {
         startDate: goalData.startDate,
         endDate: goalData.endDate,
       };
-  
-      const response = await axios.post("http://localhost:5000/api/goal/usercreate", goal, {
+
+      const response = await axios.post(`${API_URL}/goal/usercreate`, goal, {
         headers: {
           "Content-Type": "application/json",
         },
       });
-  
+
       if (response.status === 201) {
         alert(response.data.message || "Goal added successfully!");
         navigate("/home");
@@ -98,15 +99,15 @@ const NewGoal = () => {
       setError(error.response?.data?.error || "An error occurred while adding the goal.");
     }
   };
-  
+
   const handleBack = () => {
-    navigate("/home"); 
+    navigate("/home");
   };
 
   return (
     <div className={styles.formContainer}>
       <div className={styles.formLeft}>
-        <div className={styles.welcomeIcon}>🎯</div>
+        <div className={styles.welcomeIcon}></div>
         <h2 className={styles.welcomeTitle}>Create Goal</h2>
         <p className={styles.welcomeText}>Set your goals high, and don't stop until you get there!</p>
         <button className={styles.backButton} onClick={handleBack}>GO BACK</button>

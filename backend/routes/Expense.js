@@ -4,7 +4,7 @@ const mongoose = require('mongoose');
 const Expense = require('../models/Expense');
 const Budget = require('../models/Budget');
 
-router.post("/add",  async (req, res) => {
+router.post("/add", async (req, res) => {
   try {
     const { user, category, name, amount, date, description } = req.body;
 
@@ -31,14 +31,14 @@ router.post("/add",  async (req, res) => {
     await newExpense.save();
     budget.currentAmount -= amount;
     await budget.save();
-    
+
     res.status(201).json({
       message: "Expense added and budget updated!",
       expense: newExpense,
     });
   } catch (error) {
-    console.error("Error:", error.message); 
-  res.status(500).json({ error: "Internal server error" });
+    console.error("Error:", error.message);
+    res.status(500).json({ error: "Internal server error" });
   }
 });
 
@@ -55,9 +55,10 @@ router.get('/daily-expenses/:userId', async (req, res) => {
     }
 
     const { startDate, endDate } = budget;
+    const Subscription = require('../models/Subscription');
+    const subscriptions = await Subscription.find({ user: userId });
 
- 
-    const dailyExpenses = await Expense.aggregate([
+    const dailyExpensesQuery = await Expense.aggregate([
       {
         $match: {
           user: new mongoose.Types.ObjectId(userId),
@@ -72,8 +73,50 @@ router.get('/daily-expenses/:userId', async (req, res) => {
           totalAmount: { $sum: '$amount' },
         },
       },
-      { $sort: { _id: 1 } }, 
+      { $sort: { _id: 1 } },
     ]);
+
+    // Convert to a map for easy merging
+    const dailyMap = dailyExpensesQuery.reduce((acc, curr) => {
+      acc[curr._id] = curr.totalAmount;
+      return acc;
+    }, {});
+
+    // Add subscription costs
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+
+    subscriptions.forEach(sub => {
+      let current = new Date(sub.startDate);
+      // Ensure we start checking from a reasonable point relative to the budget start
+      // But subscriptions are recurring, so we check every cycle that falls within [start, end]
+
+      if (sub.cycle === 'Monthly') {
+        // Check each month in the budget range
+        let temp = new Date(start);
+        while (temp <= end) {
+          const subDate = new Date(temp.getFullYear(), temp.getMonth(), new Date(sub.startDate).getDate());
+          if (subDate >= start && subDate <= end) {
+            const dateStr = subDate.toISOString().split('T')[0];
+            dailyMap[dateStr] = (dailyMap[dateStr] || 0) + sub.amount;
+          }
+          temp.setMonth(temp.getMonth() + 1);
+        }
+      } else if (sub.cycle === 'Yearly') {
+        let temp = new Date(start);
+        const subStart = new Date(sub.startDate);
+        const subDate = new Date(temp.getFullYear(), subStart.getMonth(), subStart.getDate());
+        if (subDate >= start && subDate <= end) {
+          const dateStr = subDate.toISOString().split('T')[0];
+          dailyMap[dateStr] = (dailyMap[dateStr] || 0) + sub.amount;
+        }
+      }
+    });
+
+    const dailyExpenses = Object.keys(dailyMap).sort().map(date => ({
+      _id: date,
+      totalAmount: dailyMap[date]
+    }));
 
     res.json({
       user: userId,
@@ -89,13 +132,65 @@ router.get('/daily-expenses/:userId', async (req, res) => {
 
 router.get('/all/:user', async (req, res) => {
   try {
-    const { user } = req.params;
+    const { user: userId } = req.params;
+    const budget = await Budget.findOne({ user: userId });
 
-    const expenses = await Expense.find({ user: user });
-
-    if (!expenses.length) {
-      return res.status(404).json({ error: "No expenses found for this user." });
+    let query = { user: userId };
+    if (budget) {
+      query.date = { $gte: new Date(budget.startDate), $lte: new Date(budget.endDate) };
     }
+
+    let expenses = await Expense.find(query).sort({ date: -1 }).lean();
+
+    // Add subscription costs as virtual transactions
+    const Subscription = require('../models/Subscription');
+    const subscriptions = await Subscription.find({ user: userId });
+
+    if (budget) {
+      const start = new Date(budget.startDate);
+      const end = new Date(budget.endDate);
+
+      const today = new Date();
+      subscriptions.forEach(sub => {
+        if (sub.cycle === 'Monthly') {
+          let temp = new Date(start);
+          while (temp <= end) {
+            const subDate = new Date(temp.getFullYear(), temp.getMonth(), new Date(sub.startDate).getDate());
+            if (subDate >= start && subDate <= end && subDate <= today) {
+              expenses.push({
+                _id: `sub-${sub._id}-${subDate.getTime()}`,
+                user: sub.user,
+                category: sub.category || 'Subscription',
+                name: `${sub.name} (Subscription)`,
+                amount: sub.amount,
+                date: subDate,
+                description: `Recurring ${sub.cycle} payment`,
+                isSubscription: true
+              });
+            }
+            temp.setMonth(temp.getMonth() + 1);
+          }
+        } else if (sub.cycle === 'Yearly') {
+          const subStart = new Date(sub.startDate);
+          const subDate = new Date(start.getFullYear(), subStart.getMonth(), subStart.getDate());
+          if (subDate >= start && subDate <= end && subDate <= today) {
+            expenses.push({
+              _id: `sub-${sub._id}-${subDate.getTime()}`,
+              user: sub.user,
+              category: sub.category || 'Subscription',
+              name: `${sub.name} (Subscription)`,
+              amount: sub.amount,
+              date: subDate,
+              description: `Recurring ${sub.cycle} payment`,
+              isSubscription: true
+            });
+          }
+        }
+      });
+    }
+
+    // Sort again since we added virtual transactions
+    expenses.sort((a, b) => new Date(b.date) - new Date(a.date));
 
     res.status(200).json({
       message: "Expenses fetched successfully!",
@@ -108,27 +203,58 @@ router.get('/all/:user', async (req, res) => {
 });
 router.get('/category-percentage/:user', async (req, res) => {
   try {
-    const { user } = req.params;
+    const { user: userId } = req.params;
+    const budget = await Budget.findOne({ user: userId });
 
-    const expenses = await Expense.find({ user: user });
-
-    if (!expenses.length) {
-      return res.status(404).json({ error: "No expenses found for this user." });
+    let query = { user: userId };
+    if (budget) {
+      query.date = { $gte: new Date(budget.startDate), $lte: new Date(budget.endDate) };
     }
 
-    const totalAmount = expenses.reduce((total, expense) => total + expense.amount, 0);
+    const expenses = await Expense.find(query).lean();
+    const Subscription = require('../models/Subscription');
+    const subscriptions = await Subscription.find({ user: userId });
 
     const categorySums = expenses.reduce((acc, expense) => {
-      if (!acc[expense.category]) {
-        acc[expense.category] = 0;
-      }
+      if (!acc[expense.category]) acc[expense.category] = 0;
       acc[expense.category] += expense.amount;
       return acc;
     }, {});
 
+    // Add subscription costs if a budget exists
+    if (budget) {
+      const start = new Date(budget.startDate);
+      const end = new Date(budget.endDate);
+
+      const today = new Date();
+      subscriptions.forEach(sub => {
+        let count = 0;
+        if (sub.cycle === 'Monthly') {
+          let temp = new Date(start);
+          while (temp <= end) {
+            const subDate = new Date(temp.getFullYear(), temp.getMonth(), new Date(sub.startDate).getDate());
+            if (subDate >= start && subDate <= end && subDate <= today) count++;
+            temp.setMonth(temp.getMonth() + 1);
+          }
+        } else if (sub.cycle === 'Yearly') {
+          const subStart = new Date(sub.startDate);
+          const subDate = new Date(start.getFullYear(), subStart.getMonth(), subStart.getDate());
+          if (subDate >= start && subDate <= end && subDate <= today) count++;
+        }
+
+        if (count > 0) {
+          const category = sub.category || 'Subscription';
+          if (!categorySums[category]) categorySums[category] = 0;
+          categorySums[category] += sub.amount * count;
+        }
+      });
+    }
+
+    const totalAmount = Object.values(categorySums).reduce((total, amt) => total + amt, 0);
+
     const categoryPercentages = Object.keys(categorySums).map(category => {
       const categoryAmount = categorySums[category];
-      const percentage = (categoryAmount / totalAmount) * 100;
+      const percentage = totalAmount > 0 ? (categoryAmount / totalAmount) * 100 : 0;
       return { category, amount: categoryAmount, percentage: percentage.toFixed(2) };
     });
 
@@ -188,6 +314,31 @@ router.put('/edit/:id', async (req, res) => {
       message: "Expense updated successfully!",
       expense: updatedExpense,
     });
+  } catch (error) {
+    console.error(error.message);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+router.delete('/delete/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const expense = await Expense.findById(id);
+
+    if (!expense) {
+      return res.status(404).json({ error: "Expense not found." });
+    }
+
+    // Add amount back to budget
+    const budget = await Budget.findOne({ user: expense.user });
+    if (budget) {
+      budget.currentAmount += expense.amount;
+      await budget.save();
+    }
+
+    await Expense.findByIdAndDelete(id);
+
+    res.status(200).json({ message: "Expense deleted successfully!" });
   } catch (error) {
     console.error(error.message);
     res.status(500).json({ error: "Internal server error" });

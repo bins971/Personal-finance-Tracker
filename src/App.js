@@ -15,8 +15,9 @@ import Page from './components/Page';
 import BudgetForm from './components/Home/setBudget';
 import { BudgetProvider } from './context/BudgetContext';
 import CustomExpense from './components/Home/CustomExpense';
-import Reward from './components/Home/Reward';
+import Achievement from './components/Home/Achievement';
 import Advisor from './components/Home/Advisor';
+import BudgetHistoryView from './components/Home/BudgetHistoryView';
 
 function App() {
   return (
@@ -37,8 +38,9 @@ function App() {
               <Route path="/" element={<Page />} />
               <Route path="/setBudget" element={<BudgetForm />} />
               <Route path="/CustomExpense" element={<CustomExpense />} />
-              <Route path="/Reward" element={<Reward />} />
+              <Route path="/achievement" element={<Achievement />} />
               <Route path="/advisor" element={<Advisor />} />
+              <Route path="/budget-history" element={<BudgetHistoryView />} />
             </Routes>
           </Layout>
         </BudgetProvider>

@@ -1,5 +1,9 @@
 import React, { useState, useContext, useEffect } from 'react';
 import { AuthContext } from "../../context/AuthContext.js";
+import { API_URL } from "../../apiConfig";
+import { useNavigate } from 'react-router-dom';
+import IconButton from '@mui/material/IconButton';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 
 const Profile = () => {
   const [editMode, setEditMode] = useState(false);
@@ -13,19 +17,23 @@ const Profile = () => {
   });
 
   const { user } = useContext(AuthContext);
+  const navigate = useNavigate();
   console.log("**")
   console.log(user)
   localStorage.setItem('userEmail', user?.email);
 
   const loggedInUserEmail = localStorage.getItem('userEmail');
-  console.log(loggedInUserEmail);  
+  console.log(loggedInUserEmail);
 
   const genderOptions = ['Male', 'Female', 'Other'];
   const workingStatusOptions = ['Student', 'Housewife', 'Working Professional'];
   useEffect(() => {
     const fetchUserData = async () => {
+      const userId = user?.id || user?._id;
+      if (!userId) return;
+
       try {
-        const response = await fetch(`http://localhost:5000/api/auth/profile/${user.id}`, {  
+        const response = await fetch(`${API_URL}/auth/by-profile/${userId}`, {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
@@ -34,6 +42,7 @@ const Profile = () => {
         const data = await response.json();
         console.log("all")
         console.log(data.username)
+        // ... (inside fetchUserData)
         if (response.ok) {
           setUser({
             username: data.username || '',
@@ -43,6 +52,11 @@ const Profile = () => {
             dob: data.dob ? new Date(data.dob).toISOString().split('T')[0] : '',
             workingStatus: data.workingStatus || '',
           });
+
+          // Auto-enable edit mode if critical fields are empty
+          if (!data.username || !data.age) {
+            setEditMode(true);
+          }
         } else {
           console.error(data.message);
         }
@@ -54,10 +68,10 @@ const Profile = () => {
     if (loggedInUserEmail) {
       fetchUserData();
     }
-  }, [user.id]);  
+  }, [user?.id, user?._id]);
   const handleChange = (e) => {
     setUser({
-      ...edituser,  
+      ...edituser,
       [e.target.name]: e.target.value,
     });
   };
@@ -69,12 +83,12 @@ const Profile = () => {
   const handleSave = async () => {
     if (editMode) {
       try {
-        const response = await fetch(`http://localhost:5000/api/auth/update/${loggedInUserEmail}`, {  
+        const response = await fetch(`${API_URL}/auth/update/${loggedInUserEmail}`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify(edituser), 
+          body: JSON.stringify(edituser),
         });
 
         if (response.ok) {
@@ -86,12 +100,26 @@ const Profile = () => {
         console.error('Error updating profile:', error);
       }
     }
-    setEditMode(false); 
+    setEditMode(false);
   };
 
   return (
     <div style={styles.container}>
       <div style={styles.header}>
+        <IconButton
+          onClick={() => navigate('/home')}
+          sx={{
+            color: 'white',
+            position: 'absolute',
+            left: '20px',
+            top: '50%',
+            transform: 'translateY(-50%)',
+            transition: 'all 0.3s ease',
+            '&:hover': { bgcolor: 'rgba(255,255,255,0.1)', transform: 'translateY(-50%) scale(1.1)' }
+          }}
+        >
+          <ArrowBackIcon />
+        </IconButton>
         <h2 style={styles.headerText}>Profile</h2>
       </div>
       <div style={styles.profileContainer}>
@@ -104,7 +132,7 @@ const Profile = () => {
               name="username"
               value={edituser.username}
               onChange={handleChange}
-              style={styles.input}
+              style={{ ...styles.input, ...(!editMode ? styles.disabledInput : {}) }}
               disabled={!editMode}
             />
           </div>
@@ -115,7 +143,7 @@ const Profile = () => {
               name="age"
               value={edituser.age}
               onChange={handleChange}
-              style={styles.input}
+              style={{ ...styles.input, ...(!editMode ? styles.disabledInput : {}) }}
               disabled={!editMode}
             />
           </div>
@@ -126,7 +154,7 @@ const Profile = () => {
               name="email"
               value={edituser.email}
               onChange={handleChange}
-              style={styles.input}
+              style={{ ...styles.input, ...styles.disabledInput }}
               disabled
             />
           </div>
@@ -138,7 +166,7 @@ const Profile = () => {
               name="gender"
               value={edituser.gender}
               onChange={handleChange}
-              style={styles.input}
+              style={{ ...styles.input, ...(!editMode ? styles.disabledInput : {}) }}
               disabled={!editMode}
             >
               {genderOptions.map((option) => (
@@ -154,7 +182,7 @@ const Profile = () => {
               name="workingStatus"
               value={edituser.workingStatus}
               onChange={handleChange}
-              style={styles.input}
+              style={{ ...styles.input, ...(!editMode ? styles.disabledInput : {}) }}
               disabled={!editMode}
             >
               {workingStatusOptions.map((option) => (
@@ -171,7 +199,7 @@ const Profile = () => {
               name="dob"
               value={edituser.dob}
               onChange={handleChange}
-              style={styles.input}
+              style={{ ...styles.input, ...(!editMode ? styles.disabledInput : {}) }}
               disabled={!editMode}
             />
           </div>
@@ -192,64 +220,85 @@ const Profile = () => {
 
 const styles = {
   container: {
-    fontFamily: 'Arial, sans-serif',
-    width: '80%',
-    margin: '90px auto',
-    padding: '20px',
-    backgroundColor: '#f4f4f9',
-    borderRadius: '8px',
-    boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
+    width: '90%',
+    maxWidth: '1000px',
+    margin: '40px auto 80px auto', // Added bottom margin to avoid cut-off
+    padding: '40px',
+    background: 'var(--glass-bg)',
+    backdropFilter: 'blur(20px)',
+    borderRadius: '24px',
+    boxShadow: 'var(--glass-shadow)',
+    border: '1px solid var(--glass-border)',
   },
   header: {
-    background: 'linear-gradient(135deg, #3D52A0, #ADBBDA)',
-    padding: '20px',
-    borderRadius: '8px',
+    background: 'linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%)',
+    padding: '30px',
+    borderRadius: '20px',
     color: 'white',
     textAlign: 'center',
+    marginBottom: '40px',
+    boxShadow: '0 10px 25px -5px rgba(79, 70, 229, 0.4)',
+    position: 'relative', // Added for absolute positioning of back button
   },
   headerText: {
     margin: 0,
-    fontSize: '2rem',
+    fontSize: '2.5rem',
+    fontWeight: 700,
+    fontFamily: 'Poppins',
   },
   profileContainer: {
     marginTop: '20px',
   },
   gridContainer: {
     display: 'grid',
-    gridTemplateColumns: '1fr 1fr',
-    gap: '20px',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', // Responsive grid
+    gap: '30px',
   },
   fieldContainer: {
-    marginBottom: '15px',
+    marginBottom: '20px',
   },
   input: {
     width: '100%',
-    padding: '12px',
-    marginTop: '5px',
-    borderRadius: '6px',
-    border: '1px solid #ddd',
-    fontSize: '1.1rem',
-    backgroundColor: '#f0f0f0', 
+    padding: '16px',
+    marginTop: '8px',
+    borderRadius: '12px',
+    border: '1px solid rgba(0,0,0,0.1)',
+    fontSize: '1rem',
+    backgroundColor: 'rgba(255,255,255,0.4)',
+    fontFamily: 'Poppins',
+    transition: 'all 0.2s ease',
+  },
+  disabledInput: {
+    backgroundColor: 'rgba(200,200,200,0.3)',
+    cursor: 'not-allowed',
+    color: '#555',
   },
   editButton: {
-    padding: '12px 24px',
-    backgroundColor: '#2575fc',
+    padding: '12px 30px',
+    backgroundColor: 'var(--primary)',
     color: 'white',
     border: 'none',
-    borderRadius: '8px',
+    borderRadius: '50px',
     cursor: 'pointer',
-    fontSize: '1.1rem',
-    marginTop: '20px',
+    fontSize: '1rem',
+    fontWeight: 600,
+    marginTop: '30px',
+    fontFamily: 'Poppins',
+    transition: 'all 0.3s ease',
   },
   saveButton: {
-    padding: '12px 24px',
-    backgroundColor: '#4CAF50',
+    padding: '12px 30px',
+    backgroundColor: 'var(--secondary)',
     color: 'white',
     border: 'none',
-    borderRadius: '8px',
+    borderRadius: '50px',
     cursor: 'pointer',
-    fontSize: '1.1rem',
-    marginTop: '20px',
+    fontSize: '1rem',
+    fontWeight: 600,
+    marginTop: '30px',
+    marginLeft: '15px',
+    fontFamily: 'Poppins',
+    transition: 'all 0.3s ease',
   },
 };
 

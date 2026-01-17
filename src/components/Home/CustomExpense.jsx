@@ -1,17 +1,18 @@
-import React, { useState,useContext, useEffect } from "react";
+import React, { useState, useContext, useEffect } from "react";
 import axios from "axios";
+import { API_URL } from "../../apiConfig";
 import styles from "../../styles/checkexpense.module.css";
 import { AuthContext } from "../../context/AuthContext.js";
 import AddCircleOutlineRoundedIcon from '@mui/icons-material/AddCircleOutlineRounded';
 export default function CheckExpense() {
   const [expenses, setExpenses] = useState([]);
   const [error, setError] = useState("");
-  const [viewAll, setViewAll] = useState(false); 
-const { user } = useContext(AuthContext);
+  const [viewAll, setViewAll] = useState(false);
+  const { user } = useContext(AuthContext);
   useEffect(() => {
     const fetchExpenses = async () => {
       try {
-        const response = await axios.get(`http://localhost:5000/api/expense/all/${user.id}`);
+        const response = await axios.get(`${API_URL}/expense/all/${user.id}`);
         if (response.data.message === "Expenses fetched successfully!") {
           setExpenses(response.data.expenses);
         }
@@ -29,7 +30,7 @@ const { user } = useContext(AuthContext);
   };
 
   const handleViewAll = () => {
-    setViewAll(!viewAll); 
+    setViewAll(!viewAll);
   };
 
   const displayedExpenses = viewAll ? expenses : expenses.slice(0, 4);
@@ -42,21 +43,21 @@ const { user } = useContext(AuthContext);
 
       {displayedExpenses.length > 0 ? (
         <div>
-        <div className={styles.cardContainer}>
-          {displayedExpenses.map((expense) => (
-            <div key={expense._id} className={styles.card}>
-              <h3>{expense.name}</h3>
-              <p><strong>Amount:</strong> ${expense.amount}</p>
-              <p><strong>Date:</strong> {new Date(expense.date).toLocaleDateString()}</p>
-              <p><strong>Description:</strong> {expense.description || "N/A"}</p>
-              <button onClick={() => handleEdit(expense._id)} className={styles.editButton}>Edit</button>
-            </div>
-          ))}
-         
-        </div>
-        <div className={styles.btnbody}>
-        
-        </div>  
+          <div className={styles.cardContainer}>
+            {displayedExpenses.map((expense) => (
+              <div key={expense._id} className={styles.card}>
+                <h3>{expense.name}</h3>
+                <p><strong>Amount:</strong> ${expense.amount}</p>
+                <p><strong>Date:</strong> {new Date(expense.date).toLocaleDateString()}</p>
+                <p><strong>Description:</strong> {expense.description || "N/A"}</p>
+                <button onClick={() => handleEdit(expense._id)} className={styles.editButton}>Edit</button>
+              </div>
+            ))}
+
+          </div>
+          <div className={styles.btnbody}>
+
+          </div>
         </div>
       ) : (
         <p>No expenses to show.</p>
@@ -71,10 +72,10 @@ const { user } = useContext(AuthContext);
         </div>
       )}
       <hr></hr>
-      
+
       <div className={styles.createNew}>
-          <h3>Track a New Custom Expense</h3>
-          <p><AddCircleOutlineRoundedIcon /></p>
+        <h3>Track a New Custom Expense</h3>
+        <p><AddCircleOutlineRoundedIcon /></p>
       </div>
     </div>
   );

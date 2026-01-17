@@ -1,7 +1,8 @@
-import React,{ useContext , useState } from "react";
+import React, { useContext, useState } from "react";
 import styles from "../../styles/addform.module.css";
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from "../../context/AuthContext.js";
+import { API_URL } from "../../apiConfig";
 const StyledForm = () => {
   const [category, setCategory] = useState("");
   const [customCategory, setCustomCategory] = useState("");
@@ -33,21 +34,21 @@ const StyledForm = () => {
         date,
         description,
       };
-  
+
       console.log(expenseData);
-  
-      const response = await fetch("http://localhost:5000/api/expense/add", {
+
+      const response = await fetch(`${API_URL}/expense/add`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify(expenseData),
       });
-  
+
       const result = await response.json();
       if (response.ok) {
         alert(result.message);
-        
+
         // Navigate to a new page with the added expense details
         navigate("/home", { state: { expense: result.expense } });
       } else {
@@ -58,7 +59,7 @@ const StyledForm = () => {
       alert("An error occurred while adding the expense.");
     }
   };
-  
+
 
   const handleBack = () => {
     navigate("/home");
@@ -67,7 +68,7 @@ const StyledForm = () => {
   return (
     <div className={styles.formContainer}>
       <div className={styles.formLeft}>
-        <div className={styles.welcomeIcon}>💸</div>
+        <div className={styles.welcomeIcon}></div>
         <h2 className={styles.welcomeTitle}>Expense</h2>
         <p className={styles.welcomeText}>Fill in your expense details!</p>
         <button className={styles.backButton} onClick={handleBack}>GO BACK</button>

@@ -3,43 +3,46 @@ dotenv.config();
 const express = require("express");
 const bodyParser = require("body-parser");
 const cors = require("cors");
+const mongoose = require('mongoose');
 const userRoutes = require("./routes/Auth");
 const budgetRoutes = require("./routes/Budget");
 const goalRoutes = require("./routes/Goal");
 const connectDB = require("./config/db");
 const ExpenseRoutes = require("./routes/Expense");
-const expenseRoutes = require('./routes/expenseRoutes');
 const advisorRoutes = require("./routes/advisor");
-
+const subscriptionRoutes = require("./routes/Subscription");
 
 const app = express();
 const PORT = process.env.PORT || 5000;
+
+// Connect to Database
+connectDB();
+
+// Middleware
 app.use(bodyParser.json());
 app.use(cors());
 
-connectDB();
+// Health Check
+app.get("/health", (req, res) => res.status(200).json({ status: "UP", timestamp: new Date() }));
+
+// Routes
 app.use("/api/auth", userRoutes);
 app.use("/api/budget", budgetRoutes);
-app.use("/api/expense", ExpenseRoutes)
+app.use("/api/expense", ExpenseRoutes);
 app.use("/api/goal", goalRoutes);
-app.use('/api', expenseRoutes);
 app.use("/api/advisor", advisorRoutes);
-app.get("/", (req, res) => {
-  res.send("Welcome to the User API");
+app.use("/api/subscription", subscriptionRoutes);
+
+// Serve static assets if in production
+if (process.env.NODE_ENV === "production") {
+  const path = require("path");
+  app.use(express.static(path.join(__dirname, "../build")));
+
+  app.get("*", (req, res) => {
+    res.sendFile(path.resolve(__dirname, "../build", "index.html"));
+  });
+}
+
+const server = app.listen(PORT, () => {
+  console.log(`Server running in ${process.env.NODE_ENV || 'development'} mode on port ${PORT}`);
 });
-
-app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
-});
-
-require('dotenv').config();
-const mongoose = require('mongoose');
-
-const mongoURI = process.env.MONGODB_URI;
-
-mongoose.connect(mongoURI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-})
-  .then(() => console.log('MongoDB connected successfully!'))
-  .catch(err => console.error('Error connecting to MongoDB Atlas:', err));

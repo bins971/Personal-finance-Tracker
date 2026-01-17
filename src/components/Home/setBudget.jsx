@@ -3,6 +3,8 @@ import styles from '../../styles/addform.module.css';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from "../../context/AuthContext.js";
 import axios from 'axios';
+import { API_URL } from "../../apiConfig";
+import { Box, Typography } from '@mui/material';
 
 const BudgetForm = () => {
   const { user } = useContext(AuthContext);
@@ -19,24 +21,29 @@ const BudgetForm = () => {
 
   useEffect(() => {
     const fetchBudgetData = async () => {
+      if (!user || !user.id) return;
       try {
-        const response1 = await axios.get(`http://localhost:5000/api/budget/fetch/${user.id}`);
+        const response1 = await axios.get(`${API_URL}/budget/fetch/${user.id}`);
 
         // Setting totalAmount and currentAmount
         setTotalAmount(response1.data.totalAmount);
         setCurrentAmount(response1.data.currentAmount);
 
         // Formatting start date
-        const startdate = new Date(response1.data.startdate);
-        const startformattedDate = startdate.toISOString().split('T')[0];
+        if (response1.data.startdate) {
+          const startdate = new Date(response1.data.startdate);
+          if (!isNaN(startdate.getTime())) {
+            setstartdate(startdate.toISOString().split('T')[0]);
+          }
+        }
 
         // Formatting end date
-        const enddate = new Date(response1.data.enddate);
-        const endformattedDate = enddate.toISOString().split('T')[0];
-
-        // Setting the formatted start and end dates
-        setstartdate(startformattedDate);
-        setenddate(endformattedDate);
+        if (response1.data.enddate) {
+          const enddate = new Date(response1.data.enddate);
+          if (!isNaN(enddate.getTime())) {
+            setenddate(enddate.toISOString().split('T')[0]);
+          }
+        }
 
         // Store the fetched data in state
         setBudgetData(response1.data);  // Store response in state
@@ -48,20 +55,8 @@ const BudgetForm = () => {
 
     // Fetching the data when the component mounts or user.id changes
     fetchBudgetData();
-  }, [user.id]);
+  }, [user?.id]);
 
-  const calculateEndDate = (start) => {
-    if (!start) return '';
-    const date = new Date(start);
-    date.setMonth(date.getMonth() + 1);
-    return date.toISOString().split('T')[0];
-  };
-
-  const handleStartDateChange = (e) => {
-    const start = e.target.value;
-    setstartdate(start);
-    setenddate(calculateEndDate(start));
-  };
 
   const handleBack = () => {
     navigate("/home");
@@ -69,19 +64,23 @@ const BudgetForm = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     try {
-      console.log(user.id)
+      const userId = user?.id || user?._id;
+      if (!userId) {
+        setError('User not found');
+        return;
+      }
       // Check if the budget data is already fetched
-      const url = budgetData ? `http://localhost:5000/api/budget/update/${user.id}` : `http://localhost:5000/api/budget/create`;
+      const url = budgetData ? `${API_URL}/budget/update/${userId}` : `${API_URL}/budget/create`;
       console.log("id")
-      
+
       const method = budgetData ? 'PUT' : 'POST';
 
       const body = {
         user: user.id,
         totalAmount,
-        currentAmount:totalAmount,
+        currentAmount: totalAmount,
         startDate: startdate,
         endDate: enddate,
       };
@@ -109,9 +108,30 @@ const BudgetForm = () => {
   return (
     <div className={styles.formContainer}>
       <div className={styles.formLeft}>
-        <div className={styles.welcomeIcon}>💰</div>
+        <div className={styles.welcomeIcon}></div>
         <h2 className={styles.welcomeTitle}>Budget</h2>
         <p className={styles.welcomeText}>Fill in your Budget details!</p>
+
+        <Box sx={{ mt: 4, mb: 4, textAlign: 'left', px: 3 }}>
+          <Typography variant="subtitle2" sx={{ fontWeight: 700, color: '#EEF2FF', mb: 1, letterSpacing: '0.05em', textTransform: 'uppercase' }}>
+            🏆 How to earn medals
+          </Typography>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+            <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.8)', display: 'flex', alignItems: 'center', gap: 1 }}>
+              <span style={{ fontSize: '1.2rem' }}>🥇</span> Save 30% or more to get Gold
+            </Typography>
+            <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.8)', display: 'flex', alignItems: 'center', gap: 1 }}>
+              <span style={{ fontSize: '1.2rem' }}>🥈</span> Save 15% - 29% to get Silver
+            </Typography>
+            <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.8)', display: 'flex', alignItems: 'center', gap: 1 }}>
+              <span style={{ fontSize: '1.2rem' }}>🥉</span> Save 5% - 14% to get Bronze
+            </Typography>
+          </Box>
+          <Typography variant="caption" sx={{ display: 'block', mt: 2, fontStyle: 'italic', color: 'rgba(255,255,255,0.6)' }}>
+            * Achievement is awarded when you set a NEW budget period.
+          </Typography>
+        </Box>
+
         <button className={styles.backButton} onClick={handleBack}>GO BACK</button>
       </div>
       <div className={styles.formRight}>
@@ -133,10 +153,8 @@ const BudgetForm = () => {
             <input
               type="date"
               value={startdate}
-              onChange={handleStartDateChange}
+              onChange={(e) => setstartdate(e.target.value)}
               className={styles.input}
-              disabled={!!budgetData}
-              readOnly={!!budgetData}
               required
             />
           </div>
@@ -146,13 +164,13 @@ const BudgetForm = () => {
             <input
               type="date"
               value={enddate}
+              onChange={(e) => setenddate(e.target.value)}
               className={styles.input}
-              disabled
-              readOnly
+              required
             />
           </div>
 
-          
+
 
           {error && <p style={{ color: 'red' }}>{error}</p>}
 

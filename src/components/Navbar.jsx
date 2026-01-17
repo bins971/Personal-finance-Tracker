@@ -13,11 +13,25 @@ import GradeIcon from '@mui/icons-material/Grade';
 import SmartToyIcon from '@mui/icons-material/SmartToy';
 
 
+import { AuthContext } from "../context/AuthContext";
+
 function CustomNavbar() {
+    const { user } = React.useContext(AuthContext);
     const navigate = useNavigate();
+
+    const getDisplayName = () => {
+        if (user?.username) return user.username.toUpperCase();
+        if (user?.email) return user.email.split("@")[0].toUpperCase();
+        return "FINANCE";
+    };
+
     const handleLogout = () => {
-        localStorage.removeItem('authToken');
+        if (window.confirm("Are you sure you want to logout?")) {
+            localStorage.removeItem('authToken');
+            navigate("/");
+        }
     }
+
     // const { isLoggedIn, setIsLoggedIn } = useAuth(); 
 
     // const handleLogout = () => {
@@ -29,15 +43,30 @@ function CustomNavbar() {
     // };
 
     return (
-        <Navbar expand="lg" className={styles.navbody}>
+        <Navbar expand="lg" className={styles.navbody} variant="light">
             <Container fluid>
-                <img
-                    src={logo}
-                    alt="Logo"
-                    width="120"
-                    height="30"
-                    className="d-inline-block align-text-top ms-3"
-                />
+                <Link to="/Dashboard" style={{ textDecoration: 'none' }}>
+                    <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '10px',
+                        padding: '5px 15px',
+                        borderRadius: '12px',
+                        background: 'linear-gradient(135deg, #1E1B4B 0%, #4338CA 100%)',
+                        boxShadow: '0 4px 15px rgba(67, 56, 202, 0.2)',
+                    }}>
+                        <span style={{
+                            fontSize: '1.2rem',
+                            fontWeight: '900',
+                            color: '#FFFFFF',
+                            fontFamily: 'Poppins',
+                            letterSpacing: '0.1em',
+                            textTransform: 'uppercase'
+                        }}>
+                            {getDisplayName()}'S TRACKER
+                        </span>
+                    </div>
+                </Link>
                 <Navbar.Toggle aria-controls="navbarScroll" />
                 <Navbar.Collapse id="navbarScroll">
                     <Nav
@@ -45,17 +74,17 @@ function CustomNavbar() {
                         style={{ maxHeight: '100px' }}
                         navbarScroll
                     />
-                    <Link to="/"><button id="loginbutton" onClick={handleLogout} className="btn">
+                    <button id="loginbutton" onClick={handleLogout} className="btn" style={{ fontWeight: 600 }}>
                         LogOut
-                    </button></Link>
+                    </button>
 
                     <div>
-                        <Link to="/Reward" className={styles.profile}>
+                        <Link to="/achievement" className={styles.profile} title="Achievements">
                             <GradeIcon />
                         </Link>
                     </div>
                     <div>
-                        <Link to="/advisor" className={styles.profile} style={{ marginRight: '15px' }}>
+                        <Link to="/advisor" className={styles.profile} style={{ marginRight: '15px' }} title="AI Advisor">
                             <SmartToyIcon />
                         </Link>
                     </div>

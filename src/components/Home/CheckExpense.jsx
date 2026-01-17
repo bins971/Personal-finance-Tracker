@@ -1,4 +1,5 @@
 import React, { useState, useContext, useEffect } from "react";
+import { API_URL } from "../../apiConfig";
 import styles from "../../styles/checkexpense.module.css";
 import axios from "axios";
 import { AuthContext } from "../../context/AuthContext.js";
@@ -15,19 +16,19 @@ export default function CheckExpense() {
   const { user } = useContext(AuthContext);
   const { id } = useParams();
 
-  
+
   useEffect(() => {
     const fetchExpenses = async () => {
       try {
-        const response = await axios.get(`http://localhost:5000/api/expense/all/${id}`);
-        
+        const response = await axios.get(`${API_URL}/expense/all/${id}`);
+
         if (response.data.message === "Expenses fetched successfully!") {
           setExpenses(response.data.expenses);
           setFilteredExpenses(response.data.expenses);
         }
       } catch (err) {
         console.error("Error fetching expenses:", err);
-        
+
       }
     };
 
@@ -38,14 +39,14 @@ export default function CheckExpense() {
     setSelectedDate(date);
     if (date) {
       if (viewMode === "daily") {
-     
+
         const formattedDate = date.toLocaleDateString();
         const filtered = expenses.filter(expense =>
           new Date(expense.date).toLocaleDateString() === formattedDate
         );
         setFilteredExpenses(filtered);
       } else if (viewMode === "monthly") {
-  
+
         const selectedMonthYear = `${date.getFullYear()}-${date.getMonth() + 1}`;
         const filtered = expenses.filter(expense => {
           const expenseDate = new Date(expense.date);
@@ -65,8 +66,8 @@ export default function CheckExpense() {
 
   const toggleViewMode = (mode) => {
     setViewMode(mode);
-    setSelectedDate(null); 
-    setFilteredExpenses(expenses); 
+    setSelectedDate(null);
+    setFilteredExpenses(expenses);
   };
 
   return (
@@ -77,13 +78,13 @@ export default function CheckExpense() {
         {/* Toggle Buttons for View Mode */}
         <div className={styles.togbtn}>
           <div>
-          <button 
-            className={viewMode === "daily" ? styles.activeButton : ""} 
-            onClick={() => toggleViewMode("daily")}>Daily</button></div>
+            <button
+              className={viewMode === "daily" ? styles.activeButton : ""}
+              onClick={() => toggleViewMode("daily")}>Daily</button></div>
           <div>
-          <button 
-            className={viewMode === "monthly" ? styles.activeButton : ""} 
-            onClick={() => toggleViewMode("monthly")}>Monthly</button></div>
+            <button
+              className={viewMode === "monthly" ? styles.activeButton : ""}
+              onClick={() => toggleViewMode("monthly")}>Monthly</button></div>
         </div>
 
         {/* Date Picker */}
@@ -96,7 +97,7 @@ export default function CheckExpense() {
             placeholderText={viewMode === "daily" ? "Select a date" : "Select a month"}
           />
         </div>
-        
+
         {/* Display Total Amount */}
         <div>
           <h3>Total Amount: ₱{calculateTotalAmount().toFixed(2)}</h3>
@@ -114,15 +115,15 @@ export default function CheckExpense() {
               <p><strong>Amount:</strong> ₱{expense.amount}</p>
               <p><strong>Date:</strong> {new Date(expense.date).toLocaleDateString()}</p>
               <p><strong>Description:</strong> {expense.description || "N/A"}</p>
-              
+
             </div>
           ))}
         </div>
       ) : (
-        
-          <div className={styles.nodata}>
-            <img src={NoData} alt="Error" style={{ maxWidth: "200px", marginBottom: "20px" }} />
-          </div> 
+
+        <div className={styles.nodata}>
+          <img src={NoData} alt="Error" style={{ maxWidth: "200px", marginBottom: "20px" }} />
+        </div>
       )}
     </div>
   );

@@ -1,15 +1,16 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import styles from "../../styles/login.module.css"; 
+import styles from "../../styles/login.module.css";
 import { useAuth } from "../context/AuthContext";
+import { API_URL } from "../apiConfig";
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
-  const [loading, setLoading] = useState(false); 
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-  const { setIsLoggedIn, setEmail: setAuthEmail } = useAuth(); 
+  const { setIsLoggedIn, setEmail: setAuthEmail } = useAuth();
 
   // Load email from localStorage if available
   useEffect(() => {
@@ -25,14 +26,14 @@ const Login = () => {
 
     if (!email || !password) {
       setMessage("Email and password are required.");
-      setLoading(false); 
+      setLoading(false);
       return;
     }
 
-    const loginUrl = "http://localhost:5000/api/auth/login"; 
+    const loginUrl = `${API_URL}/auth/login`;
 
     try {
-      const response = await fetch("http://localhost:5000/api/auth/login", {
+      const response = await fetch(`${API_URL}/auth/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -45,7 +46,7 @@ const Login = () => {
       if (response.ok) {
         localStorage.setItem("authToken", data.authToken);
         localStorage.setItem("email", email);
-        setAuthEmail(email); 
+        setAuthEmail(email);
         setMessage("Login successful! Redirecting...");
         setIsLoggedIn(true);
 

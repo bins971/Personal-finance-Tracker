@@ -2,6 +2,7 @@ import React, { useState, useContext } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import styles from "../../styles/login.module.css";
 import { AuthContext } from "../../context/AuthContext";
+import { API_URL } from "../../apiConfig";
 import LoginImg from "../../images/LoginImg.png";
 
 const Login = () => {
@@ -22,7 +23,7 @@ const Login = () => {
     }
 
     try {
-      const loginResponse = await fetch("http://localhost:5000/api/auth/login", {
+      const loginResponse = await fetch(`${API_URL}/auth/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -61,7 +62,7 @@ const Login = () => {
           <h2>Welcome Back!</h2>
           <p>Log in to continue accessing your account and goals.</p>
           <img src={LoginImg} alt="Login" style={{ maxWidth: '300px', marginBottom: '20px' }} />
-       
+
         </div>
         <div className={styles["right-side"]}>
           <h2>Sign In</h2>
@@ -92,7 +93,7 @@ const Login = () => {
           </form>
           {errorMessage && <p className={styles["error-message"]}>{errorMessage}</p>}
           <div className={styles["signup-link"]}>
-            
+
             <p>
               New user? <Link to="/signup">Sign up</Link>
             </p>
