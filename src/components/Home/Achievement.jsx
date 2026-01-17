@@ -9,14 +9,14 @@ import {
   Box,
   IconButton,
 } from "@mui/material";
-import { Delete as DeleteIcon, ArrowBack as ArrowBackIcon } from "@mui/icons-material";
+import { ArrowBack as ArrowBackIcon } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import styles from "../../styles/home.module.css";
 import { useAuth } from "../../context/AuthContext";
 
 const Achievement = () => {
-  const { isLoggedIn, user } = useAuth();
+  const { user } = useAuth();
   const navigate = useNavigate();
   const [goals, setGoals] = useState([]);
   const [historyAchievements, setHistoryAchievements] = useState([]);

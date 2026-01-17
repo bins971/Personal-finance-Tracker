@@ -1,7 +1,7 @@
 
 import React, { useState, useContext } from 'react';
 import { API_URL } from "../../apiConfig";
-import { Container, Card, Typography, Box, Button, CircularProgress, Alert, Dialog, DialogTitle, DialogContent, DialogActions, IconButton, Paper, Avatar, Grid, Chip } from '@mui/material';
+import { Container, Card, Typography, Box, Button, CircularProgress, Dialog, DialogTitle, DialogContent, DialogActions, IconButton, Paper, Avatar, Grid, Chip } from '@mui/material';
 import SmartToyIcon from '@mui/icons-material/SmartToy';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import PsychologyIcon from '@mui/icons-material/Psychology';
@@ -15,7 +15,7 @@ import styles from '../../styles/home.module.css';
 const Advisor = () => {
     const [advice, setAdvice] = useState('');
     const [loading, setLoading] = useState(false);
-    const [error, setError] = useState('');
+    const [, setError] = useState('');
     const [openPopup, setOpenPopup] = useState(false);
     const { user } = useContext(AuthContext);
     const navigate = useNavigate();

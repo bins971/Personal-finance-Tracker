@@ -10,13 +10,13 @@ import { AuthContext } from "../../context/AuthContext";
 const ForecastWidget = () => {
     const { user } = useContext(AuthContext);
     const [forecast, setForecast] = useState(null);
-    const [loading, setLoading] = useState(true);
+    const [loading] = useState(true);
 
     useEffect(() => {
         if (user && user.id) {
             fetchForecast();
         }
-    }, [user]);
+    }, [user, fetchForecast]);
 
     const fetchForecast = async () => {
         try {

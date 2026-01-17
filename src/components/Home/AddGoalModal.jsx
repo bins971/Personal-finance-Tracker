@@ -2,7 +2,7 @@ import React, { useState, useContext } from 'react';
 import { API_URL } from "../../apiConfig";
 import {
     Dialog, DialogTitle, DialogContent, DialogActions,
-    TextField, Button, Alert, Box, MenuItem
+    TextField, Button, Alert, MenuItem
 } from '@mui/material';
 import axios from 'axios';
 import { AuthContext } from '../../context/AuthContext';

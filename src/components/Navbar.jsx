@@ -1,14 +1,10 @@
 import React from 'react';
-import Button from 'react-bootstrap/Button';
 import Container from 'react-bootstrap/Container';
 import Nav from 'react-bootstrap/Nav';
 import Navbar from 'react-bootstrap/Navbar';
 import styles from '../styles/home.module.css';
 import PersonIcon from '@mui/icons-material/Person';
-import EmailRoundedIcon from '@mui/icons-material/EmailRounded';
-import logo from '../images/logo1.png';
 import { Link, useNavigate } from "react-router-dom";
-import { useAuth } from "./context/AuthContext";
 import GradeIcon from '@mui/icons-material/Grade';
 import SmartToyIcon from '@mui/icons-material/SmartToy';
 
@@ -32,15 +28,6 @@ function CustomNavbar() {
         }
     }
 
-    // const { isLoggedIn, setIsLoggedIn } = useAuth(); 
-
-    // const handleLogout = () => {
-    //     if (window.confirm("Are you sure you want to logout?")) { 
-    //         localStorage.removeItem("authToken");
-    //         setIsLoggedIn(false);
-    //         navigate("/login");
-    //     }
-    // };
 
     return (
         <Navbar expand="lg" className={styles.navbody} variant="light">

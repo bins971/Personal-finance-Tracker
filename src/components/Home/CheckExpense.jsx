@@ -10,10 +10,10 @@ import NoData from "../../images/NoData.png";
 export default function CheckExpense() {
   const [expenses, setExpenses] = useState([]);
   const [filteredExpenses, setFilteredExpenses] = useState([]);
-  const [error, setError] = useState("");
+  const [error] = useState("");
   const [selectedDate, setSelectedDate] = useState(null);
   const [viewMode, setViewMode] = useState("daily");
-  const { user } = useContext(AuthContext);
+  const { } = useContext(AuthContext);
   const { id } = useParams();
 
 

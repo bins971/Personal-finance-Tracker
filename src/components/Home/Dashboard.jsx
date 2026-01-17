@@ -7,20 +7,18 @@ import {
   Button, Dialog, DialogTitle, DialogContent, DialogActions, TextField,
   Fab, LinearProgress, IconButton, Tooltip as MuiTooltip, CircularProgress
 } from '@mui/material';
-import { Pie, Line } from 'react-chartjs-2';
+import { Line } from 'react-chartjs-2';
 import 'chart.js/auto';
 import Subscriptions from './Subscriptions';
 import ForecastWidget from './ForecastWidget';
 import { Chart as ChartJS, ArcElement, CategoryScale, LinearScale, Title, Tooltip, Legend, PointElement, LineElement, Filler } from 'chart.js';
 import AddIcon from '@mui/icons-material/Add';
-import DownloadIcon from '@mui/icons-material/Download';
 import DeleteIcon from '@mui/icons-material/Delete';
 import HistoryIcon from '@mui/icons-material/History';
 import styles from '../../styles/home.module.css';
 import axios from 'axios';
 import { API_URL } from "../../apiConfig";
 import { AuthContext } from '../../context/AuthContext';
-import NoData from '../../images/NoData.png';
 import AddGoalModal from './AddGoalModal';
 
 ChartJS.register(ArcElement, CategoryScale, LinearScale, Title, Tooltip, Legend, PointElement, LineElement, Filler);
@@ -55,14 +53,14 @@ const Dashboard = () => {
     return "Friend";
   };
 
-  const getGreeting = () => {
-    const hour = new Date().getHours();
-    if (hour < 12) return "Good Morning";
-    if (hour < 18) return "Good Afternoon";
-    return "Good Evening";
-  };
+  // const getGreeting = () => {
+  //   const hour = new Date().getHours();
+  //   if (hour < 12) return "Good Morning";
+  //   if (hour < 18) return "Good Afternoon";
+  //   return "Good Evening";
+  // };
 
-  const quote = "Do not save what is left after spending, but spend what is left after saving.";
+  // const quote = "Do not save what is left after spending, but spend what is left after saving.";
 
   useEffect(() => {
     const fetchData = async () => {
@@ -150,7 +148,7 @@ const Dashboard = () => {
       }
     };
     fetchData();
-  }, [user?.id, user?._id, user?.email]);
+  }, [user]);
 
   useEffect(() => {
     const newLineData = {
@@ -181,25 +179,25 @@ const Dashboard = () => {
     setLineData(newLineData);
   }, [dailyExpenses]);
 
-  const data = {
-    labels: categoryPercentages.map((item) => item.category),
-    datasets: [
-      {
-        data: categoryPercentages.map((item) => item.percentage),
-        backgroundColor: [
-          'rgba(79, 70, 229, 0.8)',   // Indigo
-          'rgba(16, 185, 129, 0.8)',  // Emerald
-          'rgba(244, 63, 94, 0.8)',   // Rose
-          'rgba(245, 158, 11, 0.8)',  // Amber
-          'rgba(59, 130, 246, 0.8)',  // Blue
-          'rgba(139, 92, 246, 0.8)'   // Violet
-        ],
-        borderColor: '#ffffff',
-        borderWidth: 2,
-        hoverOffset: 10
-      },
-    ],
-  };
+  // const data = {
+  //   labels: categoryPercentages.map((item) => item.category),
+  //   datasets: [
+  //     {
+  //       data: categoryPercentages.map((item) => item.percentage),
+  //       backgroundColor: [
+  //         'rgba(79, 70, 229, 0.8)',   // Indigo
+  //         'rgba(16, 185, 129, 0.8)',  // Emerald
+  //         'rgba(244, 63, 94, 0.8)',   // Rose
+  //         'rgba(245, 158, 11, 0.8)',  // Amber
+  //         'rgba(59, 130, 246, 0.8)',  // Blue
+  //         'rgba(139, 92, 246, 0.8)'   // Violet
+  //       ],
+  //       borderColor: '#ffffff',
+  //       borderWidth: 2,
+  //       hoverOffset: 10
+  //     },
+  //   ],
+  // };
 
   const lineOptions = {
     responsive: true,
