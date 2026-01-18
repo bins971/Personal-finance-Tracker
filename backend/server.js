@@ -1,5 +1,6 @@
 const dotenv = require("dotenv");
-dotenv.config();
+const path = require("path");
+dotenv.config({ path: path.join(__dirname, ".env") });
 const express = require("express");
 const bodyParser = require("body-parser");
 const cors = require("cors");
@@ -43,6 +44,12 @@ if (process.env.NODE_ENV === "production") {
   });
 }
 
-const server = app.listen(PORT, () => {
-  console.log(`Server running in ${process.env.NODE_ENV || 'development'} mode on port ${PORT}`);
-});
+// Export the app for Vercel (serverless)
+module.exports = app;
+
+// Only listen if the file is run directly (not imported as a module)
+if (require.main === module) {
+  const server = app.listen(PORT, () => {
+    console.log(`Server running in ${process.env.NODE_ENV || 'development'} mode on port ${PORT}`);
+  });
+}
