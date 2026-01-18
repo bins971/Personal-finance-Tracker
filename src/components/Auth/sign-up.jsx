@@ -19,15 +19,22 @@ const UserSignUp = () => {
     event.preventDefault();
     setErrorMessage("");
     try {
+      console.log(`Sending signup request to: ${API_URL}/auth/signup`);
       const response = await fetch(`${API_URL}/auth/signup`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password, username, gender, age, dob, workingStatus }),
       });
       const data = await response.json();
-      if (response.ok) navigate("/login");
-      else setErrorMessage(data.message || data.errors || "Sign-up failed. Try again.");
+      if (response.ok) {
+        console.log("Signup successful");
+        navigate("/login");
+      } else {
+        console.error("Signup failed:", data);
+        setErrorMessage(data.message || data.errors || "Sign-up failed. Try again.");
+      }
     } catch (error) {
+      console.error("Signup connection error:", error);
       setErrorMessage("An error occurred. Please try again.");
     }
   };
