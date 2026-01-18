@@ -12,7 +12,7 @@
 
 [build.environment]
   # Node version for build
-  NODE_VERSION = "18"
+  NODE_VERSION = "20"
   
   # Set production environment
   NODE_ENV = "production"
